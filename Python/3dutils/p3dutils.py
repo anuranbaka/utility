@@ -16,7 +16,7 @@ def interpolate(Fg_w1,Fg_w2,t):
         t        (Float): the time to interpolate to between transform 1 and transform 2
 
     Returns:
-        Fg_wt   (matrix): rigid body transform taking world coords to cg coordinates at t=t
+        Fg_wt   (matrix): rigid body transform taking world coords to cg coordinates at t=t (same type as transform 1)
     """
     F1 = matrix(Fg_w1)
     F2 = matrix(Fg_w2)
@@ -36,12 +36,20 @@ def interpolate(Fg_w1,Fg_w2,t):
     R2 = F2[0:3,0:3]
 
     Rd = R2*R1.T
-    rd = Rodrigues(Rd)
-    Rt = Rodrigues(t*rd)*R1
-    T1 = F1[3,0:3]
-    T2 = F2[3,0:3]
+    rd = array(Rodrigues(Rd)[0])
+    Rt = matrix(Rodrigues(t*rd)[0])*R1
 
+    T1 = F1[0:3,3:4]
+    T2 = F2[0:3,3:4]
 
+    Tt = T1*(1-t)+T2*t
+
+    Ft = np.zeros_like(Fg_w1)
+    Ft[-1,-1] = 1.0
+    Ft[0:3,0:3] = Rt
+    Ft[0:3,3:4] = Tt
+
+    return Ft
 
 
 
