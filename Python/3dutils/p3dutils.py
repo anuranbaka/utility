@@ -6,7 +6,7 @@ import cv2
 from cv2 import Rodrigues
 
 
-def interpolate(Fg_w1,Fg_w2,t):
+def interpolate_rigid(Fg_w1,Fg_w2,t):
     """Interpolates a rigid body motion proportionally between two endpoints.
     Makes the assumption of constant angular velocity, rather than dealing with pollhode motion stuff.
 
