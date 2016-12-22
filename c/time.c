@@ -40,7 +40,7 @@ void current_utc_time(struct timespec *ts) {
 }
 
 
-void demo(int argc, char **argv) {
+static void demo(int argc, char **argv) {
 
   struct timespec ts;
   current_utc_time(&ts);
