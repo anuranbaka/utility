@@ -18,7 +18,6 @@
     #include <cstdlib>
 
     extern "C" {
-    static char** backtraceSymbols( void* const* addrList, int numAddr );
 #else
     #include <stdlib.h>
 #endif
@@ -81,14 +80,14 @@ static inline void printStackTrace( FILE *out, unsigned int max_frames)
         fprintf( out, "  \n" );
         return;
     }
-
-
-#ifndef __cplusplus
-    //IF USING PURE C, USE THIS AS THE REMAINDER OF THE FUNCTION
+    
     // resolve addresses into strings containing "filename(function+address)",
     // Actually it will be ## program address function + offset
     // this array must be free()-ed
     char** symbollist = backtrace_symbols( addrlist, addrlen );
+
+#ifndef __cplusplus
+    
     //IF USING PURE C, USE THIS AS THE REMAINDER OF THE FUNCTION
     // print the stack trace.
     unsigned int i;
@@ -97,12 +96,6 @@ static inline void printStackTrace( FILE *out, unsigned int max_frames)
 
     free(symbollist);
 #else //__cplusplus
-    // resolve addresses into strings containing "filename(function+address)",
-    // Actually it will be ## program address function + offset
-    // this array must be free()-ed
-    char** symbollist = backtrace_symbols( addrlist, addrlen );
-    unsigned int i;
-
 
    size_t funcnamesize = 1024;
    char funcname[1024];
@@ -177,18 +170,23 @@ static inline void printStackTrace( FILE *out, unsigned int max_frames)
          // DO: addr2line  -i -e /usr/local/lib/libopencv_core.so.3.2  $( printf '%x\n' $((0x`nm /usr/local/lib/libopencv_core.so.3.2 | grep _ZNK2cv12_OutputArray6createEiiiibi| cut -d " " -f 1` +0x5c5)) )
          size_t syscommandsize = 4096;
          char* syscommand = (char*)malloc(syscommandsize);
+
          if(begin_name+1 < begin_offset){
              syscommandsize = syscommand ? syscommandsize : funcnamesize;
              syscommand = syscommand ? syscommand : funcname;               //use funcname if cannot alloc
              snprintf(syscommand, syscommandsize,
                       "addr2line  -i -e %s"
                       " $( printf '%%x\\n' $(( 0x0`nm %s 2>/dev/null"
-                         " | grep %s"
+                         " | grep ' %s' "
                          " | cut -d \" \" -f 1` +%s"
                          " )) 2>/dev/null) 1>&2", symbollist[i], symbollist[i], begin_name, begin_offset);
-             //printf("%s\n",syscommand);
-             //fflush(stdout);
+
+             //fprintf(stderr,">%s\n",syscommand);
              system(syscommand);
+         }
+         else
+         {
+             fprintf(stderr, "??:0\n");
          }
  
          // Now apply
